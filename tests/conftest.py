@@ -17,12 +17,15 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 
+from opensearch_genai_sdk.enrichment import AggregatorSpanProcessor
+
 
 # Module-level singletons, initialised once per process.
 _exporter = InMemorySpanExporter()
 _provider = TracerProvider(
     resource=Resource.create({"service.name": "test-service"}),
 )
+_provider.add_span_processor(AggregatorSpanProcessor())
 _provider.add_span_processor(SimpleSpanProcessor(_exporter))
 
 # Allow setting the global provider (only succeeds the first time the

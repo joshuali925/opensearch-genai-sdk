@@ -126,18 +126,24 @@ def register(
             headers=headers,
         )
 
-    # Step 4: Create Processor and wire up
+    # Step 4: Add enrichment aggregator (must come before the export processor
+    # so that on_end fires while the enrichment stack is still populated)
+    from opensearch_genai_sdk.enrichment import AggregatorSpanProcessor
+
+    provider.add_span_processor(AggregatorSpanProcessor())
+
+    # Step 5: Create export processor and wire up
     if batch:
         processor = BatchSpanProcessor(exporter)
     else:
         processor = SimpleSpanProcessor(exporter)
     provider.add_span_processor(processor)
 
-    # Step 5: Set as global provider
+    # Step 6: Set as global provider
     if set_global:
         trace.set_tracer_provider(provider)
 
-    # Step 6: Auto-instrument installed libraries
+    # Step 7: Auto-instrument installed libraries
     if auto_instrument:
         _auto_instrument(provider)
 
